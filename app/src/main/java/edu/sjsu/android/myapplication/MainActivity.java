@@ -1,5 +1,9 @@
 package edu.sjsu.android.myapplication;
 
+import static android.view.View.GONE;
+import static android.view.View.INVISIBLE;
+import static android.view.View.VISIBLE;
+
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 
@@ -33,6 +37,19 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
+
+        navController.addOnDestinationChangedListener((con, dest, args) -> {
+                if (dest.getId() == R.id.navigation_login) {
+                    navView.setVisibility(GONE);
+                    if (getSupportActionBar() != null)
+                        getSupportActionBar().hide();
+                }
+                else {
+                    navView.setVisibility(VISIBLE);
+                    if (getSupportActionBar() != null)
+                        getSupportActionBar().show();
+                }
+        });
 
         SQLiteController dbCon = new SQLiteController(this);
         SQLiteDatabase db = dbCon.getWritableDatabase();
