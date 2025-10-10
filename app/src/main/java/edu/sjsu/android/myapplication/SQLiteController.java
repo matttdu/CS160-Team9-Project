@@ -74,15 +74,4 @@ public class SQLiteController extends SQLiteOpenHelper {
         return success;
     }
 
-    // Check if user exists
-    private boolean checkUserExists(String username, String email) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        String query = "SELECT * FROM " + TABLE_USERS + " WHERE " + COL_USERNAME + " = ? OR " + COL_EMAIL + " = ?";
-        Cursor cursor = db.rawQuery(query, new String[]{username, email});
-        boolean exists = cursor.getCount() > 0;
-        cursor.close();
-        db.close();
-        return exists;
-    }
-
 }

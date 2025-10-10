@@ -1,8 +1,6 @@
 package edu.sjsu.android.myapplication.ui.login;
 import edu.sjsu.android.myapplication.SQLiteController;
 
-import static androidx.navigation.fragment.FragmentKt.findNavController;
-
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.annotation.NonNull;
