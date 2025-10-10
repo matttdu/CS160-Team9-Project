@@ -51,8 +51,16 @@ public class MainActivity extends AppCompatActivity {
                 }
         });
 
+        // use the database here and close to prevent memory leaks
         SQLiteController dbCon = new SQLiteController(this);
-        SQLiteDatabase db = dbCon.getWritableDatabase();
+        SQLiteDatabase db = null;
+        try {
+            db = dbCon.getWritableDatabase();
+            // use the database here
+        } finally {
+            if (db != null && db.isOpen()) db.close();
+            dbCon.close();
+        }
     }
 
 }
