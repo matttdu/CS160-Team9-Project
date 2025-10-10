@@ -96,25 +96,21 @@ public class LoginFragment extends Fragment {
             }
         });
 
+        // Enable login button only if fields are not empty
         TextWatcher afterTextChangedListener = new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                // ignore
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                // ignore
-            }
-
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
             @Override
             public void afterTextChanged(Editable s) {
-                loginViewModel.loginDataChanged(usernameEditText.getText().toString(),
-                        passwordEditText.getText().toString());
+                loginButton.setEnabled(!usernameEditText.getText().toString().trim().isEmpty()
+                        && !passwordEditText.getText().toString().trim().isEmpty());
             }
         };
 
-        // Handle enter key for login
+        usernameEditText.addTextChangedListener(afterTextChangedListener);
+        passwordEditText.addTextChangedListener(afterTextChangedListener);
+
+        // Handle the enter button for login
         passwordEditText.setOnEditorActionListener((TextView v, int actionId, KeyEvent event) -> {
             if (actionId == EditorInfo.IME_ACTION_DONE) {
                 loginUser(view, usernameEditText.getText().toString(), passwordEditText.getText().toString(), loadingProgressBar);
@@ -122,7 +118,7 @@ public class LoginFragment extends Fragment {
             return false;
         });
 
-        // Handle login button
+        // Handle the login button
         loginButton.setOnClickListener(v -> {
             String username = usernameEditText.getText().toString().trim();
             String password = passwordEditText.getText().toString().trim();
@@ -144,7 +140,7 @@ public class LoginFragment extends Fragment {
             }
         });
 
-        // Handle registration button
+        // Handle the registration button
         registerButton.setOnClickListener(v -> {
             Navigation.findNavController(v).navigate(R.id.action_login_to_register);
         });
