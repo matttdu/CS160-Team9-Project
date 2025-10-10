@@ -1,4 +1,5 @@
 package edu.sjsu.android.myapplication.ui.login;
+import edu.sjsu.android.myapplication.SQLiteController;
 
 import static androidx.navigation.fragment.FragmentKt.findNavController;
 
@@ -33,6 +34,7 @@ public class LoginFragment extends Fragment {
 
     private LoginViewModel loginViewModel;
     private FragmentLoginBinding binding;
+    private SQLiteController db;
 
     @Nullable
     @Override
@@ -48,20 +50,25 @@ public class LoginFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        
+        // Init DB controller
+        db = SQLiteController.dbInstance(getContext());
+
         loginViewModel = new ViewModelProvider(this, new LoginViewModelFactory())
                 .get(LoginViewModel.class);
 
         final EditText usernameEditText = binding.username;
         final EditText passwordEditText = binding.password;
         final Button loginButton = binding.login;
+        final Button registerButton = binding.goRegister;
         final ProgressBar loadingProgressBar = binding.loading;
 
+        // For form validation
         loginViewModel.getLoginFormState().observe(getViewLifecycleOwner(), new Observer<LoginFormState>() {
             @Override
             public void onChanged(@Nullable LoginFormState loginFormState) {
-                if (loginFormState == null) {
-                    return;
-                }
+                if (loginFormState == null) return;
+
                 loginButton.setEnabled(loginFormState.isDataValid());
                 if (loginFormState.getUsernameError() != null) {
                     usernameEditText.setError(getString(loginFormState.getUsernameError()));
@@ -72,16 +79,17 @@ public class LoginFragment extends Fragment {
             }
         });
 
+        // For login results
         loginViewModel.getLoginResult().observe(getViewLifecycleOwner(), new Observer<LoginResult>() {
             @Override
             public void onChanged(@Nullable LoginResult loginResult) {
-                if (loginResult == null) {
-                    return;
-                }
+                if (loginResult == null) return;
                 loadingProgressBar.setVisibility(View.GONE);
+
                 if (loginResult.getError() != null) {
                     showLoginFailed(loginResult.getError());
                 }
+
                 if (loginResult.getSuccess() != null) {
                     updateUiWithUser(loginResult.getSuccess());
                 }
@@ -105,30 +113,60 @@ public class LoginFragment extends Fragment {
                         passwordEditText.getText().toString());
             }
         };
-        usernameEditText.addTextChangedListener(afterTextChangedListener);
-        passwordEditText.addTextChangedListener(afterTextChangedListener);
-        passwordEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
 
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    loginViewModel.login(usernameEditText.getText().toString(),
-                            passwordEditText.getText().toString());
-                }
-                return false;
+        // Handle enter key for login
+        passwordEditText.setOnEditorActionListener((TextView v, int actionId, KeyEvent event) -> {
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                loginUser(view, usernameEditText.getText().toString(), passwordEditText.getText().toString(), loadingProgressBar);
             }
+            return false;
         });
 
-        loginButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                loadingProgressBar.setVisibility(View.VISIBLE);
-                loginViewModel.login(usernameEditText.getText().toString(),
-                        passwordEditText.getText().toString());
-
+        // Handle login button
+        loginButton.setOnClickListener(v -> {
+            String username = usernameEditText.getText().toString().trim();
+            String password = passwordEditText.getText().toString().trim();
+        
+            if (username.isEmpty() || password.isEmpty()) {
+                Toast.makeText(getContext(), "Enter both username and password", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        
+            loadingProgressBar.setVisibility(View.VISIBLE);
+            boolean success = db.loginUser(username, password); // check by username + password
+            loadingProgressBar.setVisibility(View.GONE);
+        
+            if (success) {
+                Toast.makeText(getContext(), "Login successful!", Toast.LENGTH_SHORT).show();
                 Navigation.findNavController(v).navigate(R.id.successful_login);
+            } else {
+                Toast.makeText(getContext(), "Invalid username or password", Toast.LENGTH_SHORT).show();
             }
         });
+
+        // Handle registration button
+        registerButton.setOnClickListener(v -> {
+            Navigation.findNavController(v).navigate(R.id.action_login_to_register);
+        });
+    }
+
+    // Actual login logic using SQLiteController
+    private void loginUser(View view, String username, String password, ProgressBar loadingBar) {
+        if (username.isEmpty() || password.isEmpty()) {
+            Toast.makeText(getContext(), "Please enter both fields", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        loadingBar.setVisibility(View.VISIBLE);
+        boolean loggedIn = db.loginUser(username, password);
+        loadingBar.setVisibility(View.GONE);
+
+        if (loggedIn) {
+            Toast.makeText(getContext(), "Login successful!", Toast.LENGTH_SHORT).show();
+            Navigation.findNavController(view).navigate(R.id.successful_login);
+        } else {
+            Toast.makeText(getContext(), "Invalid credentials", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void updateUiWithUser(LoggedInUserView model) {
@@ -140,12 +178,7 @@ public class LoginFragment extends Fragment {
     }
 
     private void showLoginFailed(@StringRes Integer errorString) {
-        if (getContext() != null && getContext().getApplicationContext() != null) {
-            Toast.makeText(
-                    getContext().getApplicationContext(),
-                    errorString,
-                    Toast.LENGTH_LONG).show();
-        }
+        Toast.makeText(getContext().getApplicationContext(), errorString, Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -153,4 +186,5 @@ public class LoginFragment extends Fragment {
         super.onDestroyView();
         binding = null;
     }
+
 }
