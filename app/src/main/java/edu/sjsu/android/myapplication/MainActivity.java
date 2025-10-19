@@ -1,5 +1,10 @@
 package edu.sjsu.android.myapplication;
 
+import static android.view.View.GONE;
+import static android.view.View.INVISIBLE;
+import static android.view.View.VISIBLE;
+
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -32,6 +37,30 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
+
+        navController.addOnDestinationChangedListener((con, dest, args) -> {
+                if (dest.getId() == R.id.navigation_login || dest.getId() == R.id.navigation_register) {
+                    navView.setVisibility(GONE);
+                    if (getSupportActionBar() != null)
+                        getSupportActionBar().hide();
+                }
+                else {
+                    navView.setVisibility(VISIBLE);
+                    if (getSupportActionBar() != null)
+                        getSupportActionBar().show();
+                }
+        });
+
+        // use the database here and close to prevent memory leaks
+        SQLiteController dbCon = new SQLiteController(this);
+        SQLiteDatabase db = null;
+        try {
+            db = dbCon.getWritableDatabase();
+            // use the database here
+        } finally {
+            if (db != null && db.isOpen()) db.close();
+            dbCon.close();
+        }
     }
 
 }
