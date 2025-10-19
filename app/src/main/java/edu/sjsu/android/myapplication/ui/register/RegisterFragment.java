@@ -20,6 +20,8 @@ import edu.sjsu.android.myapplication.R;
 import edu.sjsu.android.myapplication.SQLiteController;
 import edu.sjsu.android.myapplication.databinding.FragmentRegisterBinding;
 
+import java.util.regex.*;
+
 public class RegisterFragment extends Fragment {
 
     private FragmentRegisterBinding binding;
@@ -67,12 +69,19 @@ public class RegisterFragment extends Fragment {
             String email = emailEditText.getText().toString().trim();
             String password = passwordEditText.getText().toString().trim();
 
-            if (db.registerUser(username, email, password)) {
-                Toast.makeText(getContext(), "Registration successful!", Toast.LENGTH_SHORT).show();
-                // Navigate back to login
-                Navigation.findNavController(view).navigate(R.id.action_register_to_login);
+            Pattern pattern = Pattern.compile("\\b[A-Z0-9._%-]+@[A-Z0-9.-]+\\.[A-Z]{2,4}\\b", Pattern.CASE_INSENSITIVE);
+            Matcher matcher = pattern.matcher(email);
+
+            if (!matcher.matches()) {
+                Toast.makeText(getContext(), "Email is invalid", Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(getContext(), "Username or email already exists", Toast.LENGTH_SHORT).show();
+                if (db.registerUser(username, email, password)) {
+                    Toast.makeText(getContext(), "Registration successful!", Toast.LENGTH_SHORT).show();
+                    // Navigate back to login
+                    Navigation.findNavController(view).navigate(R.id.action_register_to_login);
+                } else {
+                    Toast.makeText(getContext(), "Username or email already exists", Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
