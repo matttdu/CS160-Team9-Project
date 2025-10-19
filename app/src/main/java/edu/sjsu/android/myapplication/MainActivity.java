@@ -20,6 +20,7 @@ import edu.sjsu.android.myapplication.databinding.ActivityMainBinding;
 public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
+    private AppBarConfiguration appBarConfiguration; // AppBarConfiguration
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,29 +30,30 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         BottomNavigationView navView = findViewById(R.id.nav_view);
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
-        AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_notifications)
-                .build();
+
+        // appBarConfiguration
+        appBarConfiguration = new AppBarConfiguration.Builder(
+                R.id.navigation_home,
+                R.id.navigation_dashboard,
+                R.id.navigation_notifications
+        ).build();
+
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
 
         navController.addOnDestinationChangedListener((con, dest, args) -> {
-                if (dest.getId() == R.id.navigation_login || dest.getId() == R.id.navigation_register) {
-                    navView.setVisibility(GONE);
-                    if (getSupportActionBar() != null)
-                        getSupportActionBar().hide();
-                }
-                else {
-                    navView.setVisibility(VISIBLE);
-                    if (getSupportActionBar() != null)
-                        getSupportActionBar().show();
-                }
+            if (dest.getId() == R.id.navigation_login || dest.getId() == R.id.navigation_register) {
+                navView.setVisibility(GONE);
+                if (getSupportActionBar() != null)
+                    getSupportActionBar().hide();
+            } else {
+                navView.setVisibility(VISIBLE);
+                if (getSupportActionBar() != null)
+                    getSupportActionBar().show();
+            }
         });
 
-        // use the database here and close to prevent memory leaks
         SQLiteController dbCon = new SQLiteController(this);
         SQLiteDatabase db = null;
         try {
@@ -63,4 +65,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public boolean onSupportNavigateUp() {
+        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
+        return NavigationUI.navigateUp(navController, appBarConfiguration)
+                || super.onSupportNavigateUp();
+    }
 }
