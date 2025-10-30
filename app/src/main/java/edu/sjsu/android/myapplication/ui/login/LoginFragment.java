@@ -7,7 +7,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
 import android.os.Bundle;
@@ -23,6 +22,8 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.content.Context;
+
 
 import edu.sjsu.android.myapplication.databinding.FragmentLoginBinding;
 
@@ -131,6 +132,13 @@ public class LoginFragment extends Fragment {
             loadingProgressBar.setVisibility(View.GONE);
         
             if (success) {
+                // Save the logged-in username in SharedPreferences so that it’s available to all fragments.
+                requireContext()
+                        .getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
+                        .edit()
+                        .putString("loggedInUser", username)
+                        .apply();
+
                 Toast.makeText(getContext(), "Login successful!", Toast.LENGTH_SHORT).show();
                 Navigation.findNavController(v).navigate(R.id.successful_login);
             } else {
