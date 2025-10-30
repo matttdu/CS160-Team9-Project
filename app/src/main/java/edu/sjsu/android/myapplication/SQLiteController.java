@@ -13,11 +13,16 @@ public class SQLiteController extends SQLiteOpenHelper {
 
     private static SQLiteController sqLiteController;
     private static final String DB_NAME = "BinSight";
-    private static final int DB_VER = 1;
+    private static final int DB_VER = 2;
     public static final String TABLE_USERS = "Users";
     public static final String COL_USERNAME = "username";
     public static final String COL_EMAIL = "email";
     public static final String COL_PASSWORD = "password";
+    public static final String TABLE_POSTS = "Posts";
+    public static final String COL_POST_ID = "id";
+    public static final String COL_POST_TITLE = "title";
+    public static final String COL_POST_CONTENT = "content";
+    public static final String COL_POST_AUTHOR = "author";
 
     public SQLiteController(@Nullable Context context) {
         super(context, DB_NAME, null, DB_VER);
@@ -32,17 +37,29 @@ public class SQLiteController extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
+        // createUsers
         String statement = "CREATE TABLE IF NOT EXISTS " + TABLE_USERS + " (" +
                 COL_USERNAME + " TEXT PRIMARY KEY, " +
                 COL_EMAIL + " TEXT NOT NULL UNIQUE, " +
                 COL_PASSWORD + " TEXT NOT NULL" +
                 ")";
+
+        // createPosts
+        String createPosts = "CREATE TABLE IF NOT EXISTS " + TABLE_POSTS + " (" +
+                COL_POST_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                COL_POST_TITLE + " TEXT NOT NULL, " +
+                COL_POST_CONTENT + " TEXT NOT NULL, " +
+                COL_POST_AUTHOR + " TEXT NOT NULL" +
+                ")";
+
         sqLiteDatabase.execSQL(statement);
+        sqLiteDatabase.execSQL(createPosts);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_USERS);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_POSTS);
         onCreate(sqLiteDatabase);
     }
 
@@ -72,6 +89,23 @@ public class SQLiteController extends SQLiteOpenHelper {
         boolean success = cursor.getCount() > 0;
         cursor.close();
         return success;
+    }
+
+    // Add Post Method
+    public boolean addPost(String title, String content, String author) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COL_POST_TITLE, title);
+        values.put(COL_POST_CONTENT, content);
+        values.put(COL_POST_AUTHOR, author);
+        long result = db.insert(TABLE_POSTS, null, values);
+        //db.close();
+        return result != -1;
+    }
+
+    public Cursor getAllPosts() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        return db.rawQuery("SELECT * FROM " + TABLE_POSTS + " ORDER BY " + COL_POST_ID + " DESC", null);
     }
 
 }

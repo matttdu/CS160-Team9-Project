@@ -18,9 +18,9 @@
         tools:layout="@layout/fragment_dashboard" />
 
     <fragment
-        android:id="@+id/navigation_notifications"
+        android:id="@+id/navigation_profile"
         android:name="edu.sjsu.android.myapplication.ui.notifications.NotificationsFragment"
-        android:label="@string/title_notifications"
+        android:label="@string/title_profile"
         tools:layout="@layout/fragment_notifications" />
     <fragment
         android:id="@+id/navigation_login"
@@ -45,4 +45,11 @@
             android:id="@+id/action_register_to_login"
             app:destination="@id/navigation_login" />
     </fragment>
+
+    <fragment
+        android:id="@+id/aboutFragment"
+        android:name="edu.sjsu.android.myapplication.about.AboutFragment"
+        android:label="About / Info"
+        tools:layout="@layout/fragment_about" />
+
 </navigation>

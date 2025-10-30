@@ -36,6 +36,8 @@ android {
 
 dependencies {
 
+    implementation("org.osmdroid:osmdroid-android:6.1.20")
+    implementation("androidx.preference:preference:1.2.1")
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.constraintlayout)
