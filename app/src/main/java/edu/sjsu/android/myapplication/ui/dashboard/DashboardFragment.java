@@ -7,11 +7,13 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
 import edu.sjsu.android.myapplication.SQLiteController;
@@ -42,8 +44,8 @@ public class DashboardFragment extends Fragment {
         // Load saved posts from SQLite
         loadForumPosts(inflater);
 
-        // When Add button is clicked, add a mock post
-        binding.addForumButton.setOnClickListener(v -> addMockForumPost(inflater));
+        // When Add button is clicked, show add post dialog
+        binding.addForumButton.setOnClickListener(v -> showAddPostDialog(inflater));
 
         return root;
     }
@@ -65,28 +67,48 @@ public class DashboardFragment extends Fragment {
 
                 TextView title = postView.findViewById(R.id.postTitle);
                 TextView content = postView.findViewById(R.id.postContent);
+                TextView author = postView.findViewById(R.id.postAuthor);
 
                 title.setText(titleText);
-                content.setText(contentText + "\n\nPosted by: " + authorText);
+                content.setText(contentText);
+                author.setText("Posted by: " + authorText);
 
                 binding.forumList.addView(postView);
             }
         }
         cursor.close();
     }
-    private void addMockForumPost(LayoutInflater inflater) {
-        int postNumber = binding.forumList.getChildCount() + 1;
-        String titleText = "New Post #" + postNumber;
-        String contentText = "This is a mock post added by tapping the Add button!";
+    private void showAddPostDialog(LayoutInflater inflater) {
+        // Inflate dialog layout
+        View dialogView = inflater.inflate(R.layout.dialog_add_post, null);
 
-        // Save to SQLite
-        boolean success = dbController.addPost(titleText, contentText, loggedInUser);
-        if (success) {
-            Toast.makeText(requireContext(), "Post by " + loggedInUser + " saved!", Toast.LENGTH_SHORT).show();
-            loadForumPosts(inflater); // refresh list
-        } else {
-            Toast.makeText(requireContext(), "Failed to save post.", Toast.LENGTH_SHORT).show();
-        }
+        EditText titleInput = dialogView.findViewById(R.id.editPostTitle);
+        EditText contentInput = dialogView.findViewById(R.id.editPostContent);
+
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Create a New Post")
+                .setView(dialogView)
+                .setPositiveButton("Post", (dialog, which) -> {
+                    String titleText = titleInput.getText().toString().trim();
+                    String contentText = contentInput.getText().toString().trim();
+
+                    if (titleText.isEmpty() || contentText.isEmpty()) {
+                        Toast.makeText(requireContext(), "Title and description cannot be empty", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    // Save to database
+                    boolean success = dbController.addPost(titleText, contentText, loggedInUser);
+                    if (success) {
+                        Toast.makeText(requireContext(), "Post added!", Toast.LENGTH_SHORT).show();
+                        loadForumPosts(inflater);
+                    } else {
+                        Toast.makeText(requireContext(), "Failed to add post.", Toast.LENGTH_SHORT).show();
+                    }
+
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
     }
 
 
