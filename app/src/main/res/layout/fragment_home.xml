@@ -6,8 +6,66 @@
     android:layout_height="match_parent"
     tools:context=".ui.home.HomeFragment">
 
+
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/addMarkerButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="80dp"
+        android:contentDescription="Add new marker"
+        android:src="@android:drawable/ic_input_add"
+        app:backgroundTint="@color/purple_500"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:tint="@android:color/white" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/recycleButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:clickable="true"
+        android:src="@drawable/recycling_icon"
+        android:visibility="gone"
+        app:backgroundTint="@color/blue"
+        app:tint="@color/white"
+        app:layout_constraintBottom_toTopOf="@+id/addMarkerButton"
+        app:layout_constraintEnd_toEndOf="@+id/addMarkerButton" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/compostButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="4dp"
+        android:clickable="true"
+        android:src="@drawable/compost_icon"
+        android:visibility="gone"
+        app:backgroundTint="@color/green"
+        app:layout_constraintBottom_toTopOf="@+id/recycleButton"
+        app:layout_constraintEnd_toEndOf="@+id/recycleButton"
+        app:tint="@color/white" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/trashButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="4dp"
+        android:clickable="true"
+        android:src="@drawable/trash_icon"
+        android:visibility="gone"
+        app:backgroundTint="@color/gray"
+        app:layout_constraintBottom_toTopOf="@+id/compostButton"
+        app:layout_constraintEnd_toEndOf="@+id/compostButton"
+        app:tint="@color/white" />
+
     <org.osmdroid.views.MapView
         android:id="@+id/map"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        tools:layout_editor_absoluteX="30dp"
+        tools:layout_editor_absoluteY="0dp">
+
+    </org.osmdroid.views.MapView>
 </androidx.constraintlayout.widget.ConstraintLayout>

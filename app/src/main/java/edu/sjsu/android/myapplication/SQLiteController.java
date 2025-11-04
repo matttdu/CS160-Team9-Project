@@ -13,7 +13,7 @@ public class SQLiteController extends SQLiteOpenHelper {
 
     private static SQLiteController sqLiteController;
     private static final String DB_NAME = "BinSight";
-    private static final int DB_VER = 2;
+    private static final int DB_VER = 4;
     public static final String TABLE_USERS = "Users";
     public static final String COL_USERNAME = "username";
     public static final String COL_EMAIL = "email";
@@ -23,6 +23,13 @@ public class SQLiteController extends SQLiteOpenHelper {
     public static final String COL_POST_TITLE = "title";
     public static final String COL_POST_CONTENT = "content";
     public static final String COL_POST_AUTHOR = "author";
+    public static final String TABLE_MARKERS = "Markers";
+    public static final String COL_MARKER_ID = "id";
+    public static final String COL_LATITUDE = "latitude";
+    public static final String COL_LONGITUDE = "longitude";
+    public static final String COL_TYPE = "type";
+    public static final String COL_UPVOTES = "upvotes";
+    public static final String COL_DOWNVOTES = "downvotes";
 
     public SQLiteController(@Nullable Context context) {
         super(context, DB_NAME, null, DB_VER);
@@ -38,7 +45,7 @@ public class SQLiteController extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
         // createUsers
-        String statement = "CREATE TABLE IF NOT EXISTS " + TABLE_USERS + " (" +
+        String createUsers = "CREATE TABLE IF NOT EXISTS " + TABLE_USERS + " (" +
                 COL_USERNAME + " TEXT PRIMARY KEY, " +
                 COL_EMAIL + " TEXT NOT NULL UNIQUE, " +
                 COL_PASSWORD + " TEXT NOT NULL" +
@@ -52,14 +59,27 @@ public class SQLiteController extends SQLiteOpenHelper {
                 COL_POST_AUTHOR + " TEXT NOT NULL" +
                 ")";
 
-        sqLiteDatabase.execSQL(statement);
+        // createMarkers
+        String createMarkers = "CREATE TABLE IF NOT EXISTS " + TABLE_MARKERS + " (" +
+                COL_MARKER_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                COL_LATITUDE + " DOUBLE NOT NULL, " +
+                COL_LONGITUDE + " DOUBLE NOT NULL, " +
+                COL_TYPE + " TEXT NOT NULL CHECK (" + COL_TYPE + " IN ('recycling', 'compost', 'trash'))," +
+                COL_UPVOTES + " INT DEFAULT 0, " +
+                COL_DOWNVOTES + " INT DEFAULT 0" +
+                ")";
+
+
+        sqLiteDatabase.execSQL(createUsers);
         sqLiteDatabase.execSQL(createPosts);
+        sqLiteDatabase.execSQL(createMarkers);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_USERS);
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_POSTS);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_MARKERS);
         onCreate(sqLiteDatabase);
     }
 
@@ -108,4 +128,20 @@ public class SQLiteController extends SQLiteOpenHelper {
         return db.rawQuery("SELECT * FROM " + TABLE_POSTS + " ORDER BY " + COL_POST_ID + " DESC", null);
     }
 
+    // Add marker to database
+    public boolean addMarker(double lat, double longitude, String type) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COL_LATITUDE, lat);
+        values.put(COL_LONGITUDE, longitude);
+        values.put(COL_TYPE, type);
+        long result = db.insert(TABLE_MARKERS, null, values);
+        return result != -1;
+    }
+
+    // Get all markers in Marker table
+    public Cursor getAllMarkers() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        return db.rawQuery("SELECT * FROM " + TABLE_MARKERS + " ORDER BY " + COL_MARKER_ID + " DESC", null);
+    }
 }
