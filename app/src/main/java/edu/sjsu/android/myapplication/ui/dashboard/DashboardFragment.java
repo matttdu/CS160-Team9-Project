@@ -73,11 +73,24 @@ public class DashboardFragment extends Fragment {
                 content.setText(contentText);
                 author.setText("Posted by: " + authorText);
 
+                // Click to open post details
+                postView.setOnClickListener(v -> {
+                    Bundle bundle = new Bundle();
+                    bundle.putString("title", titleText);
+                    bundle.putString("content", contentText);
+                    bundle.putString("author", authorText);
+
+                    // Navigate to detail fragment
+                    androidx.navigation.Navigation.findNavController(v)
+                            .navigate(R.id.postDetailFragment, bundle);
+                });
+
                 binding.forumList.addView(postView);
             }
         }
         cursor.close();
     }
+
     private void showAddPostDialog(LayoutInflater inflater) {
         // Inflate dialog layout
         View dialogView = inflater.inflate(R.layout.dialog_add_post, null);

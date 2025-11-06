@@ -52,4 +52,10 @@
         android:label="About / Info"
         tools:layout="@layout/fragment_about" />
 
+    <fragment
+        android:id="@+id/postDetailFragment"
+        android:name="edu.sjsu.android.myapplication.ui.dashboard.PostDetailFragment"
+        android:label="Post Details"
+        tools:layout="@layout/fragment_post_detail" />
+
 </navigation>
