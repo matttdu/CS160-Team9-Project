@@ -1,24 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
     android:padding="16dp">
 
-    <EditText
-        android:id="@+id/editPostTitle"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Post Title"
-        android:inputType="textCapWords" />
+        android:orientation="vertical"
+        android:padding="8dp">
 
-    <EditText
-        android:id="@+id/editPostContent"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Post Content"
-        android:inputType="textMultiLine"
-        android:lines="4"
-        android:gravity="top"
-        android:layout_marginTop="8dp"/>
-</LinearLayout>
+        <!-- Post Title -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Title"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:layout_marginBottom="6dp"/>
+
+        <EditText
+            android:id="@+id/editPostTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter title"
+            android:inputType="textCapSentences|textMultiLine"
+            android:scrollHorizontally="false"
+            android:lines="2"
+            android:maxLines="3"
+            android:background="@android:drawable/edit_text"
+            android:padding="8dp"
+            android:textSize="16sp" />
+
+        <!-- Spacing -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="12dp"/>
+
+        <!-- Post Content -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Description"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:layout_marginBottom="6dp"/>
+
+        <EditText
+            android:id="@+id/editPostContent"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:hint="Write your post here..."
+            android:inputType="textMultiLine|textCapSentences"
+            android:gravity="top|start"
+            android:scrollbars="vertical"
+            android:overScrollMode="always"
+            android:background="@android:drawable/edit_text"
+            android:padding="8dp"
+            android:textSize="15sp" />
+
+    </LinearLayout>
+</ScrollView>

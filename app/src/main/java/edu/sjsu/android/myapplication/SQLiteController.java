@@ -103,6 +103,22 @@ public class SQLiteController extends SQLiteOpenHelper {
         return result != -1;
     }
 
+    // Edit Post Method
+    public boolean updatePost(String oldTitle, String newTitle, String newContent, String author) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COL_POST_TITLE, newTitle);
+        values.put(COL_POST_CONTENT, newContent);
+
+        // Update only if the author matches
+        int rows = db.update(TABLE_POSTS, values,
+                COL_POST_TITLE + "=? AND " + COL_POST_AUTHOR + "=?",
+                new String[]{oldTitle, author});
+
+        db.close();
+        return rows > 0;
+    }
+
     public Cursor getAllPosts() {
         SQLiteDatabase db = this.getReadableDatabase();
         return db.rawQuery("SELECT * FROM " + TABLE_POSTS + " ORDER BY " + COL_POST_ID + " DESC", null);
