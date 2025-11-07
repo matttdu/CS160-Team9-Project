@@ -1,5 +1,6 @@
 package edu.sjsu.android.myapplication.ui.home;
 
+import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -15,6 +16,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -31,6 +33,8 @@ import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.MapEventsOverlay;
 import org.osmdroid.views.overlay.Marker;
+import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
+import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
 import java.util.Objects;
 
@@ -125,6 +129,15 @@ public class HomeFragment extends Fragment {
                 receive.isListening(true, "trash");
             }
         });
+
+        // Request location permissions and create current user location marker
+        ActivityCompat.requestPermissions(requireActivity(),
+                new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION,
+                        android.Manifest.permission.ACCESS_COARSE_LOCATION}, 100);
+
+        MyLocationNewOverlay currLocation = new MyLocationNewOverlay(new GpsMyLocationProvider(requireContext()), map);
+        currLocation.enableMyLocation();
+        map.getOverlays().add(currLocation);
 
         // Render existing markers
         dbCon = new SQLiteController(requireContext());
