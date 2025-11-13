@@ -10,7 +10,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -72,30 +71,55 @@ public class PostDetailFragment extends Fragment {
         editTitle.setText(titleText);
         editContent.setText(contentText);
 
-        new AlertDialog.Builder(requireContext())
+        AlertDialog dialog = new AlertDialog.Builder(requireContext())
                 .setTitle("Edit Post")
                 .setView(dialogView)
-                .setPositiveButton("Save", (dialog, which) -> {
-                    String newTitle = editTitle.getText().toString().trim();
-                    String newContent = editContent.getText().toString().trim();
+                .setPositiveButton("Save", null)
+                .setNegativeButton("Cancel", (d, w) -> d.dismiss())
+                .setNeutralButton("Delete", null)
+                .create();
 
-                    if (newTitle.isEmpty() || newContent.isEmpty()) {
-                        Toast.makeText(requireContext(), "Fields cannot be empty", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
+        dialog.setOnShowListener(dlg -> {
+            Button saveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            Button deleteButton = dialog.getButton(AlertDialog.BUTTON_NEUTRAL);
 
-                    boolean success = dbController.updatePost(titleText, newTitle, newContent, loggedInUser);
-                    if (success) {
-                        Toast.makeText(requireContext(), "Post updated!", Toast.LENGTH_SHORT).show();
-                        titleView.setText(newTitle);
-                        contentView.setText(newContent);
-                        titleText = newTitle;
-                        contentText = newContent;
-                    } else {
-                        Toast.makeText(requireContext(), "Failed to update post.", Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
+            // Save changes
+            saveButton.setOnClickListener(v -> {
+                String newTitle = editTitle.getText().toString().trim();
+                String newContent = editContent.getText().toString().trim();
+
+                if (newTitle.isEmpty() || newContent.isEmpty()) {
+                    return; // skip saving if empty
+                }
+
+                boolean success = dbController.updatePost(titleText, newTitle, newContent, loggedInUser);
+                if (success) {
+                    titleView.setText(newTitle);
+                    contentView.setText(newContent);
+                    titleText = newTitle;
+                    contentText = newContent;
+                    dialog.dismiss();
+                }
+            });
+
+            // Delete post
+            deleteButton.setOnClickListener(v -> {
+                new AlertDialog.Builder(requireContext())
+                        .setTitle("Delete Post")
+                        .setMessage("Are you sure you want to delete this post?")
+                        .setPositiveButton("Yes", (confirmDialog, which) -> {
+                            boolean deleted = dbController.deletePost(titleText, loggedInUser);
+                            if (deleted) {
+                                dialog.dismiss();
+                                confirmDialog.dismiss();
+                                // Go back to previous fragment
+                                requireActivity().getSupportFragmentManager().popBackStack();
+                            }
+                        })
+                        .setNegativeButton("Cancel", null)
+                        .show();
+            });
+        });
+        dialog.show();
     }
 }

@@ -119,6 +119,14 @@ public class SQLiteController extends SQLiteOpenHelper {
         return rows > 0;
     }
 
+    // Delete Post Method
+    public boolean deletePost(String title, String author) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        int rows = db.delete(TABLE_POSTS, COL_POST_TITLE + "=? AND " + COL_POST_AUTHOR + "=?", new String[]{title, author});
+        db.close();
+        return rows > 0;
+    }
+
     public Cursor getAllPosts() {
         SQLiteDatabase db = this.getReadableDatabase();
         return db.rawQuery("SELECT * FROM " + TABLE_POSTS + " ORDER BY " + COL_POST_ID + " DESC", null);
