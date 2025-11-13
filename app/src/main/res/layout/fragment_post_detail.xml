@@ -17,8 +17,9 @@
             android:text="Edit Post"
             android:layout_gravity="end"
             android:visibility="gone"
-            android:layout_marginTop="12dp" /> <!-- hidden by default -->
+            android:layout_marginTop="12dp" />
 
+        <!-- Post Title -->
         <TextView
             android:id="@+id/detailTitle"
             android:layout_width="match_parent"
@@ -29,6 +30,7 @@
             android:layout_marginTop="12dp"
             android:layout_marginBottom="8dp" />
 
+        <!-- Post Author -->
         <TextView
             android:id="@+id/detailAuthor"
             android:layout_width="match_parent"
@@ -38,11 +40,47 @@
             android:textSize="14sp"
             android:layout_marginBottom="12dp" />
 
+        <!-- Post Content -->
         <TextView
             android:id="@+id/detailContent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Full content of the post goes here..."
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Comments Section -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Comments"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:layout_marginBottom="8dp" />
+
+        <LinearLayout
+            android:id="@+id/commentSection"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:divider="?android:attr/dividerHorizontal"
+            android:showDividers="middle"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Add Comment Button -->
+        <Button
+            android:id="@+id/addCommentButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Add Comment"
+            android:layout_gravity="end"
+            android:backgroundTint="@color/purple_500"
+            android:textColor="@android:color/white"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:layout_marginBottom="16dp"/>
+
     </LinearLayout>
 </ScrollView>

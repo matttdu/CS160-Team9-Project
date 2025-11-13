@@ -59,6 +59,7 @@ public class DashboardFragment extends Fragment {
             Toast.makeText(requireContext(), "No posts yet. Add one!", Toast.LENGTH_SHORT).show();
         } else {
             while (cursor.moveToNext()) {
+                int postId = cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteController.COL_POST_ID));
                 String titleText = cursor.getString(cursor.getColumnIndexOrThrow(SQLiteController.COL_POST_TITLE));
                 String contentText = cursor.getString(cursor.getColumnIndexOrThrow(SQLiteController.COL_POST_CONTENT));
                 String authorText = cursor.getString(cursor.getColumnIndexOrThrow(SQLiteController.COL_POST_AUTHOR));
@@ -73,9 +74,12 @@ public class DashboardFragment extends Fragment {
                 content.setText(contentText);
                 author.setText("Posted by: " + authorText);
 
-                // Click to open post details
+                // Capture postId in final variable for lambda
+                final int finalPostId = postId;
+
                 postView.setOnClickListener(v -> {
                     Bundle bundle = new Bundle();
+                    bundle.putInt("id", finalPostId);
                     bundle.putString("title", titleText);
                     bundle.putString("content", contentText);
                     bundle.putString("author", authorText);
