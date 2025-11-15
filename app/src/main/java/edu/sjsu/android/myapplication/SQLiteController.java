@@ -192,14 +192,14 @@ public class SQLiteController extends SQLiteOpenHelper {
     }
 
     // Add marker to database
-    public boolean addMarker(double lat, double longitude, String type) {
+    public long addMarker(double lat, double longitude, String type) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COL_LATITUDE, lat);
         values.put(COL_LONGITUDE, longitude);
         values.put(COL_TYPE, type);
         long result = db.insert(TABLE_MARKERS, null, values);
-        return result != -1;
+        return result;
     }
 
     // Get all markers in Marker table

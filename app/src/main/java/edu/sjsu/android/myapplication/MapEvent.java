@@ -58,11 +58,13 @@ public class MapEvent implements MapEventsReceiver {
                 Bitmap bitmapResize = Bitmap.createScaledBitmap(bitmap, 64, 64, false);
                 marker.setIcon(new BitmapDrawable(map.getResources(), bitmapResize));
             }
-            // Add the marker to the map
-            map.getOverlays().add(marker);
             // Add the marker the the marker table in database
             dbCon = new SQLiteController(map.getContext());
-            dbCon.addMarker(p.getLatitude(), p.getLongitude(), type);
+            int id = (int) dbCon.addMarker(p.getLatitude(), p.getLongitude(), type);
+            marker.setTitle(String.valueOf(id));
+            marker.setInfoWindow(new CustomInfo(R.layout.custom_info_window, map));
+            // Add the marker to the map
+            map.getOverlays().add(0, marker);
             // Refresh map and return that operation was completed
             map.invalidate();
             return true;

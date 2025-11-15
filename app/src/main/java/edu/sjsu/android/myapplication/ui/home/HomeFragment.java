@@ -38,6 +38,7 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
 import java.util.Objects;
 
+import edu.sjsu.android.myapplication.CustomInfo;
 import edu.sjsu.android.myapplication.MapEvent;
 import edu.sjsu.android.myapplication.R;
 import edu.sjsu.android.myapplication.SQLiteController;
@@ -147,11 +148,13 @@ public class HomeFragment extends Fragment {
                 double latitude = cursor.getDouble(cursor.getColumnIndexOrThrow(SQLiteController.COL_LATITUDE));
                 double longitude = cursor.getDouble(cursor.getColumnIndexOrThrow(SQLiteController.COL_LONGITUDE));
                 String type = cursor.getString(cursor.getColumnIndexOrThrow(SQLiteController.COL_TYPE));
-                //int upvotes = cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteController.COL_UPVOTES));
-                //int downvotes = cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteController.COL_DOWNVOTES));
+                int id = cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteController.COL_MARKER_ID));
 
                 GeoPoint point = new GeoPoint(latitude, longitude);
                 Marker marker = new Marker(map);
+                CustomInfo markerInfo = new CustomInfo(R.layout.custom_info_window, map);
+                marker.setTitle(String.valueOf(id));
+                marker.setInfoWindow(markerInfo);
                 marker.setPosition(point);
                 marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
                 if (type.equals("recycling")) {
