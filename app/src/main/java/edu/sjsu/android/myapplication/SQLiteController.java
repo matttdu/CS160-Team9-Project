@@ -13,7 +13,7 @@ public class SQLiteController extends SQLiteOpenHelper {
 
     private static SQLiteController sqLiteController;
     private static final String DB_NAME = "BinSight";
-    private static final int DB_VER = 2;
+    private static final int DB_VER = 3;
     public static final String TABLE_USERS = "Users";
     public static final String COL_USERNAME = "username";
     public static final String COL_EMAIL = "email";
@@ -35,6 +35,9 @@ public class SQLiteController extends SQLiteOpenHelper {
     public static final String COL_COMMENT_POST_TITLE = "post_title";
     public static final String COL_COMMENT_AUTHOR = "author";
     public static final String COL_COMMENT_CONTENT = "content";
+    public static final String TABLE_MARKER_RATE = "MarkerRatings";
+    public static final String COL_USER_FOREIGN = "user_id";
+    public static final String COL_MARKER_FOREIGN = "marker_id";
 
     public SQLiteController(@Nullable Context context) {
         super(context, DB_NAME, null, DB_VER);
@@ -81,18 +84,30 @@ public class SQLiteController extends SQLiteOpenHelper {
                 COL_DOWNVOTES + " INT DEFAULT 0" +
                 ")";
 
+        // create table to keep track of upvote/downvotes
+        String createMarkerRatings = "CREATE TABLE IF NOT EXISTS " + TABLE_MARKER_RATE + " (" +
+                COL_UPVOTES + " BOOLEAN DEFAULT 0, " +
+                COL_DOWNVOTES + " BOOLEAN DEFAULT 0, " +
+                COL_USER_FOREIGN + " TEXT NOT NULL, " +
+                COL_MARKER_FOREIGN + " INTEGER NOT NULL, " +
+                "FOREIGN KEY (" + COL_USER_FOREIGN + ") REFERENCES " + TABLE_USERS + "(" + COL_USERNAME + ")," +
+                "FOREIGN KEY (" + COL_MARKER_FOREIGN + ") REFERENCES " + TABLE_MARKERS + "(" + COL_MARKER_ID + ")" +
+                ");";
 
         sqLiteDatabase.execSQL(createUsers);
         sqLiteDatabase.execSQL(createComments);
         sqLiteDatabase.execSQL(createPosts);
         sqLiteDatabase.execSQL(createMarkers);
+        sqLiteDatabase.execSQL(createMarkerRatings);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_USERS);
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_POSTS);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_COMMENTS);
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_MARKERS);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_MARKER_RATE);
         onCreate(sqLiteDatabase);
     }
 
@@ -198,13 +213,23 @@ public class SQLiteController extends SQLiteOpenHelper {
         values.put(COL_LATITUDE, lat);
         values.put(COL_LONGITUDE, longitude);
         values.put(COL_TYPE, type);
-        long result = db.insert(TABLE_MARKERS, null, values);
-        return result;
+        return db.insert(TABLE_MARKERS, null, values);
     }
 
     // Get all markers in Marker table
     public Cursor getAllMarkers() {
         SQLiteDatabase db = this.getReadableDatabase();
         return db.rawQuery("SELECT * FROM " + TABLE_MARKERS + " ORDER BY " + COL_MARKER_ID + " DESC", null);
+    }
+
+    // Add marker rating to database
+    public long addMarkerRating(boolean upvote, boolean downvote, String username, int markerId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COL_UPVOTES, upvote);
+        values.put(COL_DOWNVOTES, downvote);
+        values.put(COL_USER_FOREIGN, username);
+        values.put(COL_MARKER_FOREIGN, markerId);
+        return db.insert(TABLE_MARKER_RATE, null, values);
     }
 }
