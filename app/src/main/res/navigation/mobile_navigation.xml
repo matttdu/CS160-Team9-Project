@@ -21,7 +21,11 @@
         android:id="@+id/navigation_profile"
         android:name="edu.sjsu.android.myapplication.ui.notifications.NotificationsFragment"
         android:label="@string/title_profile"
-        tools:layout="@layout/fragment_notifications" />
+        tools:layout="@layout/fragment_notifications" >
+        <argument
+            android:name="username"
+            app:argType="string" />
+    </fragment>
     <fragment
         android:id="@+id/navigation_login"
         android:name="edu.sjsu.android.myapplication.ui.login.LoginFragment"
@@ -33,6 +37,9 @@
         <action
             android:id="@+id/action_login_to_register"
             app:destination="@id/navigation_register" />
+        <action
+            android:id="@+id/action_navigation_login_to_navigation_profile"
+            app:destination="@id/navigation_profile" />
     </fragment>
 
     <fragment

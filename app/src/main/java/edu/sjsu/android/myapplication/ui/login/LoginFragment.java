@@ -23,6 +23,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.content.Context;
+import android.util.Log;
 
 
 import edu.sjsu.android.myapplication.databinding.FragmentLoginBinding;
@@ -140,6 +141,8 @@ public class LoginFragment extends Fragment {
                         .apply();
 
                 Toast.makeText(getContext(), "Login successful!", Toast.LENGTH_SHORT).show();
+
+
                 Navigation.findNavController(v).navigate(R.id.successful_login);
             } else {
                 Toast.makeText(getContext(), "Invalid username or password", Toast.LENGTH_SHORT).show();
@@ -163,8 +166,8 @@ public class LoginFragment extends Fragment {
         boolean loggedIn = db.loginUser(username, password);
         loadingBar.setVisibility(View.GONE);
 
+
         if (loggedIn) {
-            Toast.makeText(getContext(), "Login successful!", Toast.LENGTH_SHORT).show();
             Navigation.findNavController(view).navigate(R.id.successful_login);
         } else {
             Toast.makeText(getContext(), "Invalid credentials", Toast.LENGTH_SHORT).show();
