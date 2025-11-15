@@ -13,7 +13,7 @@ public class SQLiteController extends SQLiteOpenHelper {
 
     private static SQLiteController sqLiteController;
     private static final String DB_NAME = "BinSight";
-    private static final int DB_VER = 4;
+    private static final int DB_VER = 2;
     public static final String TABLE_USERS = "Users";
     public static final String COL_USERNAME = "username";
     public static final String COL_EMAIL = "email";
@@ -30,6 +30,11 @@ public class SQLiteController extends SQLiteOpenHelper {
     public static final String COL_TYPE = "type";
     public static final String COL_UPVOTES = "upvotes";
     public static final String COL_DOWNVOTES = "downvotes";
+    public static final String TABLE_COMMENTS = "Comments";
+    public static final String COL_COMMENT_ID = "comment_id";
+    public static final String COL_COMMENT_POST_TITLE = "post_title";
+    public static final String COL_COMMENT_AUTHOR = "author";
+    public static final String COL_COMMENT_CONTENT = "content";
 
     public SQLiteController(@Nullable Context context) {
         super(context, DB_NAME, null, DB_VER);
@@ -58,6 +63,13 @@ public class SQLiteController extends SQLiteOpenHelper {
                 COL_POST_CONTENT + " TEXT NOT NULL, " +
                 COL_POST_AUTHOR + " TEXT NOT NULL" +
                 ")";
+        String createComments = "CREATE TABLE IF NOT EXISTS " + TABLE_COMMENTS + " (" +
+                COL_COMMENT_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "post_id INTEGER NOT NULL, " +
+                COL_COMMENT_AUTHOR + " TEXT NOT NULL, " +
+                COL_COMMENT_CONTENT + " TEXT NOT NULL, " +
+                "FOREIGN KEY(post_id) REFERENCES " + TABLE_POSTS + "(" + COL_POST_ID + ") ON DELETE CASCADE" +
+                ")";
 
         // createMarkers
         String createMarkers = "CREATE TABLE IF NOT EXISTS " + TABLE_MARKERS + " (" +
@@ -71,6 +83,7 @@ public class SQLiteController extends SQLiteOpenHelper {
 
 
         sqLiteDatabase.execSQL(createUsers);
+        sqLiteDatabase.execSQL(createComments);
         sqLiteDatabase.execSQL(createPosts);
         sqLiteDatabase.execSQL(createMarkers);
     }
@@ -121,6 +134,56 @@ public class SQLiteController extends SQLiteOpenHelper {
         long result = db.insert(TABLE_POSTS, null, values);
         //db.close();
         return result != -1;
+    }
+
+    // Update post by ID
+    public boolean updatePostById(int postId, String newTitle, String newContent, String author) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COL_POST_TITLE, newTitle);
+        values.put(COL_POST_CONTENT, newContent);
+
+        int rows = db.update(TABLE_POSTS, values,
+                COL_POST_ID + "=? AND " + COL_POST_AUTHOR + "=?",
+                new String[]{String.valueOf(postId), author});
+
+        db.close();
+        return rows > 0;
+    }
+
+    // Delete post by ID
+    public boolean deletePostById(int postId, String author) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        // Delete all comments for this post
+        db.delete(TABLE_COMMENTS, "post_id=?", new String[]{String.valueOf(postId)});
+
+        int rows = db.delete(TABLE_POSTS,
+                COL_POST_ID + "=? AND " + COL_POST_AUTHOR + "=?",
+                new String[]{String.valueOf(postId), author});
+        db.close();
+        return rows > 0;
+    }
+
+    // Add a comment
+    public boolean addComment(int postId, String author, String content) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("post_id", postId);
+        values.put(COL_COMMENT_AUTHOR, author);
+        values.put(COL_COMMENT_CONTENT, content);
+        long result = db.insert(TABLE_COMMENTS, null, values);
+        return result != -1;
+    }
+
+    // Get comments for a post
+    public Cursor getComments(int postId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        return db.query(TABLE_COMMENTS,
+                new String[]{COL_COMMENT_ID, COL_COMMENT_AUTHOR, COL_COMMENT_CONTENT},
+                "post_id = ?",
+                new String[]{String.valueOf(postId)},
+                null, null, COL_COMMENT_ID + " ASC");
     }
 
     public Cursor getAllPosts() {
