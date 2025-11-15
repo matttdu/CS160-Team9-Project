@@ -68,7 +68,7 @@ public class CustomInfo extends MarkerInfoWindow {
                 cursor2.moveToNext();
                 if (cursor2.getInt(cursor2.getColumnIndexOrThrow(SQLiteController.COL_UPVOTES)) == 1)
                     upvoteBtn.setEnabled(false);
-                else if (cursor2.getInt(cursor2.getColumnIndexOrThrow(SQLiteController.COL_UPVOTES)) == 1)
+                else if (cursor2.getInt(cursor2.getColumnIndexOrThrow(SQLiteController.COL_DOWNVOTES)) == 1)
                     downvoteBtn.setEnabled(false);
             }
             cursor2.close();
@@ -111,7 +111,7 @@ public class CustomInfo extends MarkerInfoWindow {
                     db.beginTransaction();
                     try {
                         if (upvoteBtn.isEnabled() && downvoteBtn.isEnabled())
-                            dbCon.addMarkerRating(true, false, loggedInUser, id);
+                            dbCon.addMarkerRating(false, true, loggedInUser, id);
                         else {
                             String stmt = "UPDATE " + SQLiteController.TABLE_MARKER_RATE + " SET " + SQLiteController.COL_UPVOTES + " = 0, " +
                                     SQLiteController.COL_DOWNVOTES + " = 1 WHERE " + SQLiteController.COL_USER_FOREIGN +
