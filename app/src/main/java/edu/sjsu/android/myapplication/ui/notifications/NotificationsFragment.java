@@ -46,7 +46,7 @@ public class NotificationsFragment extends Fragment {
         postsField.setText("Number of community messages posted: " + dbController.getPostCountByUser(username));
 
         TextView commentsField = v.findViewById(R.id.profile_num_messages3);
-        commentsField.setText("Number of community messages commented on:" + dbController.getCommentCountByUser(username));
+        commentsField.setText("Number of community messages commented on: " + dbController.getCommentCountByUser(username));
 
 
         return v;

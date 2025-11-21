@@ -7,16 +7,6 @@
     android:textAlignment="center"
     tools:context=".ui.notifications.NotificationsFragment">
 
-    <Button
-        android:id="@+id/change_password"
-        android:layout_width="345dp"
-        android:layout_height="45dp"
-        android:layout_marginStart="33dp"
-        android:layout_marginBottom="100dp"
-        android:text="Change Password"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
     <TextView
         android:id="@+id/profile_num_upvotes"
         android:layout_width="383dp"
