@@ -8,17 +8,6 @@
     tools:context=".ui.notifications.NotificationsFragment">
 
     <Button
-        android:id="@+id/change_username"
-        android:layout_width="345dp"
-        android:layout_height="45dp"
-        android:layout_marginStart="33dp"
-        android:layout_marginTop="371dp"
-        android:text="Change Username"
-        app:layout_constraintBottom_toTopOf="@+id/change_password"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/profile_num_messages2" />
-
-    <Button
         android:id="@+id/change_password"
         android:layout_width="345dp"
         android:layout_height="45dp"
@@ -29,13 +18,13 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
-        android:id="@+id/profile_num_pins"
+        android:id="@+id/profile_num_upvotes"
         android:layout_width="383dp"
         android:layout_height="26dp"
         android:layout_marginStart="15dp"
         android:layout_marginTop="32dp"
         android:lineSpacingExtra="4dp"
-        android:text="Number of pins placed: 0"
+        android:text="Number of upvotes/downvotes: 0"
         android:textSize="15sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/view" />
@@ -45,12 +34,24 @@
         android:layout_width="383dp"
         android:layout_height="26dp"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="64dp"
         android:lineSpacingExtra="4dp"
         android:text="Number of community messages posted: 0"
         android:textSize="15sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/profile_num_pins" />
+        app:layout_constraintTop_toBottomOf="@id/view" />
+
+    <TextView
+        android:id="@+id/profile_num_messages3"
+        android:layout_width="383dp"
+        android:layout_height="26dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="96dp"
+        android:lineSpacingExtra="4dp"
+        android:text="Number of community messages commented on: 0"
+        android:textSize="15sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/view" />
 
     <View
         android:id="@+id/view"
@@ -58,7 +59,7 @@
         android:layout_height="1dp"
         android:layout_marginBottom="32dp"
         android:background="#E0E0E0"
-        app:layout_constraintBottom_toTopOf="@+id/profile_num_pins"
+        app:layout_constraintBottom_toTopOf="@+id/profile_num_upvotes"
         app:layout_constraintTop_toBottomOf="@+id/profile_header"
         tools:layout_editor_absoluteX="16dp" />
 
@@ -75,7 +76,7 @@
         android:textAlignment="center"
         android:textSize="22sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@+id/profile_num_pins"
+        app:layout_constraintBottom_toTopOf="@+id/profile_num_upvotes"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

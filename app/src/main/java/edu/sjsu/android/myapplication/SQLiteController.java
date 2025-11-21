@@ -232,4 +232,69 @@ public class SQLiteController extends SQLiteOpenHelper {
         values.put(COL_MARKER_FOREIGN, markerId);
         return db.insert(TABLE_MARKER_RATE, null, values);
     }
+
+    public int getMarkerRatingsCountByUser(String username) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        int count = 0;
+
+        String query = "SELECT COUNT(*) FROM " + TABLE_MARKER_RATE +
+                " WHERE " + COL_USER_FOREIGN + " = ?";
+
+        Cursor cursor = db.rawQuery(query, new String[]{username});
+        if (cursor.moveToFirst()) {
+            count = cursor.getInt(0);
+        }
+        cursor.close();
+        return count;
+    }
+
+    public int getPostCountByUser(String username) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        int count = 0;
+
+        String query = "SELECT COUNT(*) FROM " + TABLE_POSTS +
+                " WHERE " + COL_POST_AUTHOR + " = ?";
+
+        Cursor cursor = db.rawQuery(query, new String[]{username});
+        if (cursor.moveToFirst()) {
+            count = cursor.getInt(0);
+        }
+        cursor.close();
+        return count;
+    }
+
+    public int getCommentCountByUser(String username) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        int count = 0;
+
+        String query = "SELECT COUNT(*) FROM " + TABLE_COMMENTS +
+                " WHERE " + COL_COMMENT_AUTHOR + " = ?";
+
+        Cursor cursor = db.rawQuery(query, new String[]{username});
+        if (cursor.moveToFirst()) {
+            count = cursor.getInt(0);
+        }
+        cursor.close();
+        return count;
+    }
+    public int getTotalUserActivity(String username) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        int total = 0;
+
+        String query = "SELECT " +
+                "(SELECT COUNT(*) FROM " + TABLE_POSTS +
+                "  WHERE " + COL_POST_AUTHOR + " = ?) + " +
+                "(SELECT COUNT(*) FROM " + TABLE_COMMENTS +
+                "  WHERE " + COL_COMMENT_AUTHOR + " = ?) AS total";
+
+        Cursor cursor = db.rawQuery(query, new String[]{username, username});
+        if (cursor.moveToFirst()) {
+            total = cursor.getInt(0);
+        }
+        cursor.close();
+        return total;
+    }
+
+
+
 }
