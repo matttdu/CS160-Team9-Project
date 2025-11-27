@@ -13,7 +13,7 @@ public class SQLiteController extends SQLiteOpenHelper {
 
     private static SQLiteController sqLiteController;
     private static final String DB_NAME = "BinSight";
-    private static final int DB_VER = 2;
+    private static final int DB_VER = 3;
     public static final String TABLE_USERS = "Users";
     public static final String COL_USERNAME = "username";
     public static final String COL_EMAIL = "email";
@@ -23,6 +23,21 @@ public class SQLiteController extends SQLiteOpenHelper {
     public static final String COL_POST_TITLE = "title";
     public static final String COL_POST_CONTENT = "content";
     public static final String COL_POST_AUTHOR = "author";
+    public static final String TABLE_MARKERS = "Markers";
+    public static final String COL_MARKER_ID = "id";
+    public static final String COL_LATITUDE = "latitude";
+    public static final String COL_LONGITUDE = "longitude";
+    public static final String COL_TYPE = "type";
+    public static final String COL_UPVOTES = "upvotes";
+    public static final String COL_DOWNVOTES = "downvotes";
+    public static final String TABLE_COMMENTS = "Comments";
+    public static final String COL_COMMENT_ID = "comment_id";
+    public static final String COL_COMMENT_POST_TITLE = "post_title";
+    public static final String COL_COMMENT_AUTHOR = "author";
+    public static final String COL_COMMENT_CONTENT = "content";
+    public static final String TABLE_MARKER_RATE = "MarkerRatings";
+    public static final String COL_USER_FOREIGN = "user_id";
+    public static final String COL_MARKER_FOREIGN = "marker_id";
 
     public SQLiteController(@Nullable Context context) {
         super(context, DB_NAME, null, DB_VER);
@@ -38,7 +53,7 @@ public class SQLiteController extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
         // createUsers
-        String statement = "CREATE TABLE IF NOT EXISTS " + TABLE_USERS + " (" +
+        String createUsers = "CREATE TABLE IF NOT EXISTS " + TABLE_USERS + " (" +
                 COL_USERNAME + " TEXT PRIMARY KEY, " +
                 COL_EMAIL + " TEXT NOT NULL UNIQUE, " +
                 COL_PASSWORD + " TEXT NOT NULL" +
@@ -51,15 +66,48 @@ public class SQLiteController extends SQLiteOpenHelper {
                 COL_POST_CONTENT + " TEXT NOT NULL, " +
                 COL_POST_AUTHOR + " TEXT NOT NULL" +
                 ")";
+        String createComments = "CREATE TABLE IF NOT EXISTS " + TABLE_COMMENTS + " (" +
+                COL_COMMENT_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "post_id INTEGER NOT NULL, " +
+                COL_COMMENT_AUTHOR + " TEXT NOT NULL, " +
+                COL_COMMENT_CONTENT + " TEXT NOT NULL, " +
+                "FOREIGN KEY(post_id) REFERENCES " + TABLE_POSTS + "(" + COL_POST_ID + ") ON DELETE CASCADE" +
+                ")";
 
-        sqLiteDatabase.execSQL(statement);
+        // createMarkers
+        String createMarkers = "CREATE TABLE IF NOT EXISTS " + TABLE_MARKERS + " (" +
+                COL_MARKER_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                COL_LATITUDE + " DOUBLE NOT NULL, " +
+                COL_LONGITUDE + " DOUBLE NOT NULL, " +
+                COL_TYPE + " TEXT NOT NULL CHECK (" + COL_TYPE + " IN ('recycling', 'compost', 'trash'))," +
+                COL_UPVOTES + " INT DEFAULT 0, " +
+                COL_DOWNVOTES + " INT DEFAULT 0" +
+                ")";
+
+        // create table to keep track of upvote/downvotes
+        String createMarkerRatings = "CREATE TABLE IF NOT EXISTS " + TABLE_MARKER_RATE + " (" +
+                COL_UPVOTES + " BOOLEAN DEFAULT 0, " +
+                COL_DOWNVOTES + " BOOLEAN DEFAULT 0, " +
+                COL_USER_FOREIGN + " TEXT NOT NULL, " +
+                COL_MARKER_FOREIGN + " INTEGER NOT NULL, " +
+                "FOREIGN KEY (" + COL_USER_FOREIGN + ") REFERENCES " + TABLE_USERS + "(" + COL_USERNAME + ")," +
+                "FOREIGN KEY (" + COL_MARKER_FOREIGN + ") REFERENCES " + TABLE_MARKERS + "(" + COL_MARKER_ID + ")" +
+                ");";
+
+        sqLiteDatabase.execSQL(createUsers);
+        sqLiteDatabase.execSQL(createComments);
         sqLiteDatabase.execSQL(createPosts);
+        sqLiteDatabase.execSQL(createMarkers);
+        sqLiteDatabase.execSQL(createMarkerRatings);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_USERS);
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_POSTS);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_COMMENTS);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_MARKERS);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_MARKER_RATE);
         onCreate(sqLiteDatabase);
     }
 
@@ -103,9 +151,150 @@ public class SQLiteController extends SQLiteOpenHelper {
         return result != -1;
     }
 
+    // Update post by ID
+    public boolean updatePostById(int postId, String newTitle, String newContent, String author) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COL_POST_TITLE, newTitle);
+        values.put(COL_POST_CONTENT, newContent);
+
+        int rows = db.update(TABLE_POSTS, values,
+                COL_POST_ID + "=? AND " + COL_POST_AUTHOR + "=?",
+                new String[]{String.valueOf(postId), author});
+
+        db.close();
+        return rows > 0;
+    }
+
+    // Delete post by ID
+    public boolean deletePostById(int postId, String author) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        // Delete all comments for this post
+        db.delete(TABLE_COMMENTS, "post_id=?", new String[]{String.valueOf(postId)});
+
+        int rows = db.delete(TABLE_POSTS,
+                COL_POST_ID + "=? AND " + COL_POST_AUTHOR + "=?",
+                new String[]{String.valueOf(postId), author});
+        db.close();
+        return rows > 0;
+    }
+
+    // Add a comment
+    public boolean addComment(int postId, String author, String content) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("post_id", postId);
+        values.put(COL_COMMENT_AUTHOR, author);
+        values.put(COL_COMMENT_CONTENT, content);
+        long result = db.insert(TABLE_COMMENTS, null, values);
+        return result != -1;
+    }
+
+    // Get comments for a post
+    public Cursor getComments(int postId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        return db.query(TABLE_COMMENTS,
+                new String[]{COL_COMMENT_ID, COL_COMMENT_AUTHOR, COL_COMMENT_CONTENT},
+                "post_id = ?",
+                new String[]{String.valueOf(postId)},
+                null, null, COL_COMMENT_ID + " ASC");
+    }
+
     public Cursor getAllPosts() {
         SQLiteDatabase db = this.getReadableDatabase();
         return db.rawQuery("SELECT * FROM " + TABLE_POSTS + " ORDER BY " + COL_POST_ID + " DESC", null);
     }
+
+    // Add marker to database
+    public long addMarker(double lat, double longitude, String type) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COL_LATITUDE, lat);
+        values.put(COL_LONGITUDE, longitude);
+        values.put(COL_TYPE, type);
+        return db.insert(TABLE_MARKERS, null, values);
+    }
+
+    // Get all markers in Marker table
+    public Cursor getAllMarkers() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        return db.rawQuery("SELECT * FROM " + TABLE_MARKERS + " ORDER BY " + COL_MARKER_ID + " DESC", null);
+    }
+
+    // Add marker rating to database
+    public long addMarkerRating(boolean upvote, boolean downvote, String username, int markerId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COL_UPVOTES, upvote);
+        values.put(COL_DOWNVOTES, downvote);
+        values.put(COL_USER_FOREIGN, username);
+        values.put(COL_MARKER_FOREIGN, markerId);
+        return db.insert(TABLE_MARKER_RATE, null, values);
+    }
+
+    public int getMarkerRatingsCountByUser(String username) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        int count = 0;
+
+        String query = "SELECT COUNT(*) FROM " + TABLE_MARKER_RATE +
+                " WHERE " + COL_USER_FOREIGN + " = ?";
+
+        Cursor cursor = db.rawQuery(query, new String[]{username});
+        if (cursor.moveToFirst()) {
+            count = cursor.getInt(0);
+        }
+        cursor.close();
+        return count;
+    }
+
+    public int getPostCountByUser(String username) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        int count = 0;
+
+        String query = "SELECT COUNT(*) FROM " + TABLE_POSTS +
+                " WHERE " + COL_POST_AUTHOR + " = ?";
+
+        Cursor cursor = db.rawQuery(query, new String[]{username});
+        if (cursor.moveToFirst()) {
+            count = cursor.getInt(0);
+        }
+        cursor.close();
+        return count;
+    }
+
+    public int getCommentCountByUser(String username) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        int count = 0;
+
+        String query = "SELECT COUNT(*) FROM " + TABLE_COMMENTS +
+                " WHERE " + COL_COMMENT_AUTHOR + " = ?";
+
+        Cursor cursor = db.rawQuery(query, new String[]{username});
+        if (cursor.moveToFirst()) {
+            count = cursor.getInt(0);
+        }
+        cursor.close();
+        return count;
+    }
+    public int getTotalUserActivity(String username) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        int total = 0;
+
+        String query = "SELECT " +
+                "(SELECT COUNT(*) FROM " + TABLE_POSTS +
+                "  WHERE " + COL_POST_AUTHOR + " = ?) + " +
+                "(SELECT COUNT(*) FROM " + TABLE_COMMENTS +
+                "  WHERE " + COL_COMMENT_AUTHOR + " = ?) AS total";
+
+        Cursor cursor = db.rawQuery(query, new String[]{username, username});
+        if (cursor.moveToFirst()) {
+            total = cursor.getInt(0);
+        }
+        cursor.close();
+        return total;
+    }
+
+
 
 }
